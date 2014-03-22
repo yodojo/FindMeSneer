@@ -6,7 +6,6 @@ import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Address;
@@ -16,17 +15,12 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
-import com.google.android.gms.internal.ex;
 import com.google.android.gms.location.LocationClient;
 
 public class FindMeActivity extends Activity implements
@@ -44,43 +38,22 @@ public class FindMeActivity extends Activity implements
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_find_me);
 
-		if (savedInstanceState == null) {
-			getFragmentManager().beginTransaction()
-					.add(R.id.container, new PlaceholderFragment()).commit();
-		}
-		
-
+		mEndereco  = (TextView) this.findViewById(R.id.textView1);
 		mLocationClient = new LocationClient(this, this, this);
-
 	}
 
 	public void abrirMapa(View view) {
+		atualizaPosicao();
+		
 		// geoUriString="geo:15.5555,16.5000?q=(rua a)@15.5555,16.5000";
 		Uri geoUri = Uri.parse(geoUriString);
 
 		Intent mapCall = new Intent(Intent.ACTION_VIEW, geoUri);
-		startActivity(mapCall);
+		//startActivity(mapCall);
 	}
 
 	
 
-	/**
-	 * A placeholder fragment containing a simple view.
-	 */
-	public static class PlaceholderFragment extends Fragment {
-
-		public PlaceholderFragment() {
-		}
-
-		@Override
-		public View onCreateView(LayoutInflater inflater, ViewGroup container,
-				Bundle savedInstanceState) {
-			View rootView = inflater.inflate(R.layout.fragment_find_me,
-					container, false);
-			mEndereco  = (TextView) rootView.findViewById(R.id.textView1);
-			return rootView;
-		}
-	}
 
 	private void atualizaPosicao() {
 		Location mCurrentLocation = mLocationClient.getLastLocation();
@@ -125,7 +98,6 @@ public class FindMeActivity extends Activity implements
 	public void onConnected(Bundle dataBundle) {
 		// Display the connection status
 		Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
-		atualizaPosicao();
 
 	}
 
