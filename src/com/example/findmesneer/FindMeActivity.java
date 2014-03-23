@@ -23,12 +23,11 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationClient;
 
-public class FindMeActivity extends Activity implements
-		GooglePlayServicesClient.ConnectionCallbacks,
+public class FindMeActivity extends Activity implements GooglePlayServicesClient.ConnectionCallbacks,
 		GooglePlayServicesClient.OnConnectionFailedListener {
 
 	private LocationClient mLocationClient;
-	
+
 	private static TextView mEndereco;
 
 	private String geoUriString = "geo:15.5555,16.5000?q=(rua a)@15.5555,16.5000";
@@ -36,47 +35,50 @@ public class FindMeActivity extends Activity implements
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
 		setContentView(R.layout.activity_find_me);
 
-		mEndereco  = (TextView) this.findViewById(R.id.textView1);
+		mEndereco = (TextView) this.findViewById(R.id.textView1);
 		mLocationClient = new LocationClient(this, this, this);
 	}
 
 	public void abrirMapa(View view) {
 		atualizaPosicao();
-		
+
 		// geoUriString="geo:15.5555,16.5000?q=(rua a)@15.5555,16.5000";
 		Uri geoUri = Uri.parse(geoUriString);
 
 		Intent mapCall = new Intent(Intent.ACTION_VIEW, geoUri);
-		//startActivity(mapCall);
+		startActivity(mapCall);
 	}
 
-	
-
-
 	private void atualizaPosicao() {
+
 		Location mCurrentLocation = mLocationClient.getLastLocation();
-		
-		
-			AsyncTask<Location,Void,String> execute = (new GetAddressTask(this)).execute(mCurrentLocation);
-			
-			try {
+
+		AsyncTask<Location, Void, String> execute = (new GetAddressTask(this)).execute(mCurrentLocation);
+
+		try {
 			mEndereco.setText(execute.get());
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ExecutionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			geoUriString = "geo:" + mCurrentLocation.getLatitude() + ","
-					+ mCurrentLocation.getLongitude() + "?q=("+mEndereco.getText()+")@"
-					+ mCurrentLocation.getLatitude() + ","
-					+ mCurrentLocation.getLongitude();
-			
-	
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			e.printStackTrace();
+		}
+
+		StringBuilder sb = new StringBuilder("geo:");
+		
+		sb.append(mCurrentLocation.getLatitude())
+		  .append(",")
+		  .append(mCurrentLocation.getLongitude())
+		  .append("?q=(")
+		  .append(mEndereco.getText())
+		  .append(")@")
+		  .append(mCurrentLocation.getLatitude())
+		  .append(",")
+		  .append(mCurrentLocation.getLongitude());
+		
+		geoUriString =   sb.toString();
 	}
 
 	@Override
@@ -84,7 +86,7 @@ public class FindMeActivity extends Activity implements
 		super.onStart();
 		// Connect the client.
 		mLocationClient.connect();
-	
+
 	}
 
 	@Override
@@ -102,14 +104,12 @@ public class FindMeActivity extends Activity implements
 	}
 
 	/*
-	 * Called by Location Services if the connection to the location client
-	 * drops because of an error.
+	 * Called by Location Services if the connection to the location client drops because of an error.
 	 */
 	@Override
 	public void onDisconnected() {
 		// Display the connection status
-		Toast.makeText(this, "Disconnected. Please re-connect.",
-				Toast.LENGTH_SHORT).show();
+		Toast.makeText(this, "Disconnected. Please re-connect.", Toast.LENGTH_SHORT).show();
 	}
 
 	/*
@@ -130,48 +130,44 @@ public class FindMeActivity extends Activity implements
 			mContext = context;
 		}
 
-
 		@Override
 		protected String doInBackground(Location... params) {
+
 			Geocoder geocoder = new Geocoder(mContext, Locale.getDefault());
+
 			// Get the current location from the input parameter list
 			Location loc = params[0];
+
 			// Create a list to contain the result address
 			List<Address> addresses = null;
 			try {
 				/*
 				 * Return 1 address.
 				 */
-				addresses = geocoder.getFromLocation(loc.getLatitude(),
-						loc.getLongitude(), 1);
+				addresses = geocoder.getFromLocation(loc.getLatitude(), loc.getLongitude(), 1);
 			} catch (IOException e1) {
-				Log.e("LocationSampleActivity",
-						"IO Exception in getFromLocation()");
+				Log.e("LocationSampleActivity", "IO Exception in getFromLocation()");
 				e1.printStackTrace();
 				return ("IO Exception trying to get address");
 			} catch (IllegalArgumentException e2) {
 				// Error message to post in the log
-				String errorString = "Illegal arguments "
-						+ Double.toString(loc.getLatitude()) + " , "
-						+ Double.toString(loc.getLongitude())
+				String errorString = "Illegal arguments " + Double.toString(loc.getLatitude()) + " , " + Double.toString(loc.getLongitude())
 						+ " passed to address service";
 				Log.e("LocationSampleActivity", errorString);
 				e2.printStackTrace();
 				return errorString;
 			}
+
 			// If the reverse geocode returned an address
 			if (addresses != null && addresses.size() > 0) {
 				// Get the first address
 				Address address = addresses.get(0);
 				/*
-				 * Format the first line of address (if available), city, and
-				 * country name.
+				 * Format the first line of address (if available), city, and country name.
 				 */
-				String addressText = String.format(
-						"%s, %s, %s",
-						// If there's a street address, add it
-						address.getMaxAddressLineIndex() > 0 ? address
-								.getAddressLine(0) : "",
+				String addressText = String.format("%s, %s, %s",
+				// If there's a street address, add it
+						address.getMaxAddressLineIndex() > 0 ? address.getAddressLine(0) : "",
 						// Locality is usually a city
 						address.getSubAdminArea(),
 						// The country of the address
@@ -182,12 +178,12 @@ public class FindMeActivity extends Activity implements
 				return "No address found";
 			}
 		}
-		
-		   protected void onPostExecute(String address) {
-	            // Display the results of the lookup.
-			   if(address!=null && mEndereco !=null)
-			   mEndereco.setText(address);
-	        }
+
+		protected void onPostExecute(String address) {
+			// Display the results of the lookup.
+			if (address != null && mEndereco != null)
+				mEndereco.setText(address);
+		}
 	}
 
 }
